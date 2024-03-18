@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 import 'package:wakelock/wakelock.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class VideoPlayerWidget extends StatefulWidget {
   final String channelUrl;
@@ -32,12 +33,12 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
+    // SystemChrome.setPreferredOrientations([
+    //   DeviceOrientation.portraitUp,
+    //   DeviceOrientation.portraitDown,
+    //   DeviceOrientation.landscapeLeft,
+    //   DeviceOrientation.landscapeRight,
+    // ]);
 
     return Scaffold(
       body: isLoading
@@ -161,29 +162,70 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 }
 
 class ChannelListPage extends StatelessWidget {
-  final List<String> channels = [
-    "https://dzkyvlfyge.erbvr.com/PeaceTvBangla/tracks-v3a1/mono.m3u8",
-    "https://prod-ent-live-gm.jiocinema.com/hls/live/2100297/uhd_akamai_ctv_avc_eng_wpl_s1_m1150324/index.m3u8",
-
-    // Add more channel URLs here
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('TV Channels'),
+        title: Text('Matches'),
       ),
-      body: ListView.builder(
-        itemCount: channels.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text('Channel ${index + 1}'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => VideoPlayerWidget(channelUrl: channels[index]),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection('tvlist').snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          List<DocumentSnapshot> documents = snapshot.data!.docs;
+          return ListView.builder(
+            itemCount: documents.length,
+            itemBuilder: (context, index) {
+              var matchData = documents[index].data() as Map<String, dynamic>?;
+
+              if (matchData == null || !matchData.containsKey('matchName') || !matchData.containsKey('videoUrl')) {
+                return ListTile(
+                  title: Text('Invalid match data'),
+                );
+              }
+
+              var matchName = matchData['matchName'];
+              var videoUrl = matchData['videoUrl'];
+
+              return Card(
+                elevation: 2.0,
+                margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                child: InkWell(
+                  onTap: () {
+                    if (videoUrl != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => VideoPlayerWidget(channelUrl: videoUrl),
+                        ),
+                      );
+                    } else {
+                      // Handle null or missing video URL if necessary
+                    }
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Row(
+                      children: [
+                        Icon(Icons.sports_soccer, size: 40.0, color: Colors.blue),
+                        SizedBox(width: 16.0),
+                        Expanded(
+                          child: Text(
+                            matchName ?? 'No match name',
+                            style: TextStyle(fontSize: 18.0),
+                          ),
+                        ),
+                        Icon(Icons.play_arrow, size: 40.0, color: Colors.green),
+                      ],
+                    ),
+                  ),
                 ),
               );
             },
@@ -193,5 +235,4 @@ class ChannelListPage extends StatelessWidget {
     );
   }
 }
-
 
