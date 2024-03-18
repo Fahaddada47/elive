@@ -40,79 +40,81 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     //   DeviceOrientation.landscapeRight,
     // ]);
 
-    return Scaffold(
-      body: isLoading
-          ? const Center(
-        child: CircularProgressIndicator(
-          color: Colors.red,
+    return SafeArea(
+      child: Scaffold(
+        body: isLoading
+            ? const Center(
+          child: CircularProgressIndicator(
+            color: Colors.red,
+          ),
+        )
+            : OrientationBuilder(
+          builder: (context, orientation) {
+            return Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      if (_videoPlayerController.value.isPlaying) {
+                        _videoPlayerController.pause();
+                      } else {
+                        _videoPlayerController.play();
+                      }
+                    });
+                  },
+                  child: AspectRatio(
+                    aspectRatio: _calculateAspectRatio(orientation),
+                    child: VideoPlayer(_videoPlayerController),
+                  ),
+                ),
+                Container(
+                  color: Colors.transparent,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            isFullScreen = !isFullScreen;
+                            if (isFullScreen) {
+                              _enterFullScreen();
+                            } else {
+                              _exitFullScreen();
+                            }
+                          });
+                        },
+                        icon: Icon(
+                          isFullScreen
+                              ? Icons.fullscreen_exit
+                              : Icons.fullscreen,
+                          color: Colors.white,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            if (_videoPlayerController.value.isPlaying) {
+                              _videoPlayerController.pause();
+                            } else {
+                              _videoPlayerController.play();
+                            }
+                          });
+                        },
+                        icon: Icon(
+                          _videoPlayerController.value.isPlaying
+                              ? Icons.pause
+                              : Icons.play_arrow,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
         ),
-      )
-          : OrientationBuilder(
-        builder: (context, orientation) {
-          return Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    if (_videoPlayerController.value.isPlaying) {
-                      _videoPlayerController.pause();
-                    } else {
-                      _videoPlayerController.play();
-                    }
-                  });
-                },
-                child: AspectRatio(
-                  aspectRatio: _calculateAspectRatio(orientation),
-                  child: VideoPlayer(_videoPlayerController),
-                ),
-              ),
-              Container(
-                color: Colors.transparent,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          isFullScreen = !isFullScreen;
-                          if (isFullScreen) {
-                            _enterFullScreen();
-                          } else {
-                            _exitFullScreen();
-                          }
-                        });
-                      },
-                      icon: Icon(
-                        isFullScreen
-                            ? Icons.fullscreen_exit
-                            : Icons.fullscreen,
-                        color: Colors.white,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          if (_videoPlayerController.value.isPlaying) {
-                            _videoPlayerController.pause();
-                          } else {
-                            _videoPlayerController.play();
-                          }
-                        });
-                      },
-                      icon: Icon(
-                        _videoPlayerController.value.isPlaying
-                            ? Icons.pause
-                            : Icons.play_arrow,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          );
-        },
       ),
     );
   }
