@@ -42,9 +42,11 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
     return SafeArea(
       child: Scaffold(
+        backgroundColor: Colors.blueGrey,
         body: isLoading
             ? const Center(
           child: CircularProgressIndicator(
+            backgroundColor: Colors.black38,
             color: Colors.red,
           ),
         )
