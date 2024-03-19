@@ -18,6 +18,7 @@ Future<void> main() async {
 
   print('FCM Token: $token');
   runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
     home: ChannelListPage(),
   ));
 }

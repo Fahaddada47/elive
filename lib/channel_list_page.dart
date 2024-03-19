@@ -6,8 +6,10 @@ class ChannelListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.indigo,
       appBar: AppBar(
-        title: Text('Matches'),
+        backgroundColor: Colors.blueGrey,
+        title: Text('Live Event'),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('tvlist').snapshots(),
@@ -36,6 +38,7 @@ class ChannelListPage extends StatelessWidget {
               var videoUrl = matchData['videoUrl'];
 
               return Card(
+                color: Colors.white70,
                 elevation: 2.0,
                 margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                 child: InkWell(
