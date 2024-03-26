@@ -126,7 +126,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   }
 
   void _initializeVideoPlayer() async {
-    _videoPlayerController = VideoPlayerController.network(widget.channelUrl);
+    _videoPlayerController = VideoPlayerController.network(widget.channelUrl)
+      ..addListener(_videoPlayerListener);
 
     await _videoPlayerController.initialize();
     setState(() {
@@ -135,6 +136,18 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     _videoPlayerController.play();
     Wakelock.enable();
     _startTimer();
+  }
+
+  void _videoPlayerListener() {
+    if (_videoPlayerController.value.isBuffering) {
+      setState(() {
+        isLoading = true;
+      });
+    } else {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   void _enterFullScreen() {
